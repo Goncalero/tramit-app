@@ -23,7 +23,7 @@ export class Room {
         () => Desk,
         (desk) => desk.room
     )
-    desk!: Desk
+    desk!: Desk[]
     
     // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeInsert()
@@ -34,6 +34,6 @@ export class Room {
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
-        this.checkNameLowerCase
+        this.checkNameLowerCase()
     }
 }

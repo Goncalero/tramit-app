@@ -28,13 +28,13 @@ export class User{
         array: true,
         default: ['user']
     })
-    role!: string
+    role!: string[]
 
     @Column({ 
         type: 'bool',
         default: true, 
     })
-    isActive!: string
+    isActive!: boolean
 
     // RELACIONES CON OTRAS TABLAS
     @OneToOne(
@@ -57,12 +57,12 @@ export class User{
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
-        this.checkNameLowerCase
+        this.checkNameLowerCase()
     }
 
     @BeforeUpdate()
     checkEmailLowerCaseUpdate(){
-        this.checkEmailLowerCase
+        this.checkEmailLowerCase()
     }
     
 }

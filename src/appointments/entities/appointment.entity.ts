@@ -12,22 +12,13 @@ export class Appointment {
     @Column({ type:'text' })
     citizenName!: string
 
-    @Column({ 
-        type:'text',
-        unique: true,
-    })
+    @Column({ type:'text' })
     citizenEmail!: string
 
-    @Column({ 
-        type:'text',
-        unique: true,
-    })
+    @Column({ type:'text' })
     citizenDni!: string
 
-    @Column({ 
-        type:'text',
-        unique: true,
-    })
+    @Column({ type:'text' })
     citizenPhone!: string
 
     @Column({ type:'timestamp' })
@@ -55,7 +46,8 @@ export class Appointment {
 
     @ManyToOne(
         () => Tramit,
-        (tramit) => tramit.appointment
+        (tramit) => tramit.appointment,
+        { eager: true } // LO HACEMOS PARA QUE APAREZCA EL TRÁMITE DE LA CITA
     )
     tramit!: Tramit
 
@@ -78,17 +70,17 @@ export class Appointment {
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
-        this.checkNameLowerCase
+        this.checkNameLowerCase()
     }
 
     @BeforeUpdate()
     checkEmailLowerCaseUpdate(){
-        this.checkEmailLowerCase
+        this.checkEmailLowerCase()
     }
 
     @BeforeUpdate()
     checkDniLowerCaseUpdate(){
-        this.checkDniLowerCase
+        this.checkDniLowerCase()
     }
 
 }

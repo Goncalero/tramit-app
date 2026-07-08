@@ -3,6 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { AppointmentsModule } from './appointments/appointments.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { TramitsModule } from './tramits/tramits.module';
 
 @Module({
   imports: [
@@ -18,6 +22,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    
+    AppointmentsModule,
+    AuthModule,
+    RoomsModule,
+    TramitsModule,
 
   ],
   controllers: [AppController],

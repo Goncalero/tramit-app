@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsUUID, Min, MinLength } from "class-validator";
+import { IsInt, IsNotEmpty, IsUUID, Min } from "class-validator";
 
 
 export class CreateDeskDto{

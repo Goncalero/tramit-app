@@ -1,4 +1,5 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length, MinLength } from "class-validator"
+import { Type } from "class-transformer"
+import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from "class-validator"
 
 
 export class CreateAppointmentDto {
@@ -23,8 +24,9 @@ export class CreateAppointmentDto {
     @IsNotEmpty()
     citizenPhone!: string
 
-    @IsDateString()
-    appointmentDate!: string
+    @Type(() => Date) //PARA QUE LA FECHA LA CAMBIE DE string A TIPO Date
+    @IsDate()
+    appointmentDate!: Date
 
     @IsString()
     @IsOptional()

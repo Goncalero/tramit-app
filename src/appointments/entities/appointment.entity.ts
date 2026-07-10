@@ -30,7 +30,10 @@ export class Appointment {
     })
     status!: string
 
-    @Column({ type:'text' })
+    @Column({ 
+        type:'text',
+        nullable: true,
+     })
     observations!: string
 
     @CreateDateColumn()

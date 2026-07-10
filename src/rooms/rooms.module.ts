@@ -15,6 +15,8 @@ import { Room } from './entities/room.entity';
       Room,
     ])
   ],
+
+  exports: [ TypeOrmModule ]
 })
 
 export class RoomsModule {}

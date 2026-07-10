@@ -5,8 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Tramit } from './entities/tramit.entity';
 
 @Module({
-  imports:[ TypeOrmModule.forFeature([ Tramit ]) ],
+ 
   controllers: [TramitsController],
   providers: [TramitsService],
+  imports:[ TypeOrmModule.forFeature([ Tramit ])],
+  exports: [TypeOrmModule]
 })
 export class TramitsModule {}

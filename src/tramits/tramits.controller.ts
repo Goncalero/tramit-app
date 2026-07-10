@@ -9,7 +9,7 @@ export class TramitsController {
 
   @Post()
   create(@Body() createTramitDto: CreateTramitDto) {
-    return this.tramitsService.create(createTramitDto);
+    return this.tramitsService.createTramit(createTramitDto);
   }
 
   @Get()

@@ -20,9 +20,15 @@ export class TramitsService {
   ){}
 
   async createTramit(createTramitDto: CreateTramitDto) {
+
+    const { room, ...tramitData} = createTramitDto
+
     try {
 
-      const tramitBD = this.tramitRepository.create(createTramitDto)
+      const tramitBD = this.tramitRepository.create({
+        ...tramitData,
+        room: { id: room }
+      })
       await this.tramitRepository.save(tramitBD)
     
       return tramitBD

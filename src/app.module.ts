@@ -7,11 +7,14 @@ import { AuthModule } from './auth/auth.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { TramitsModule } from './tramits/tramits.module';
+import { UsersModule } from './users/users.module';
+
+
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    
+
    TypeOrmModule.forRoot({
       type:'postgres',
       host: process.env.DB_HOST,
@@ -27,6 +30,7 @@ import { TramitsModule } from './tramits/tramits.module';
     AuthModule,
     RoomsModule,
     TramitsModule,
+    UsersModule,
 
   ],
   controllers: [AppController],

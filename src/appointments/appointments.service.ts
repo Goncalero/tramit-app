@@ -33,8 +33,16 @@ export class AppointmentsService {
     const { tramitId, appointmentDate} = createAppointmentDto //HACEMOS UN DESTRUCTURING DEL tramitId
 
     const tramit = await this.tramitRepository.findOneBy({ id: tramitId })
+
+    if ( !tramit )
+    throw new NotFoundException('Error al encontrar el trámite')
+
+    const roomId = tramit.room.id
     
-    const desks = await this.deskRepository.find()
+    const desks = await this.deskRepository.find({
+      where: { room: { id: roomId } }
+
+    })
     const occupiedAppoint = await this.appointmentRepository.find({ //BUSCA LA desk Y date PARA SABER SI ESTÁ OCUPADA LA MESA A ESA HORA
       where: { appointmentDate }, // ESTO ES LO MISMO QUE PONER EN LA RELACIÓN DE LA ENTIDAD {eager:true}
       relations: { desk: true } 
@@ -49,9 +57,6 @@ export class AppointmentsService {
     const availableDesk = desks.find( 
       desk => !occupiedAppoint.some( appointment => appointment.desk.id === desk.id
       ))
-
-     if ( !tramit )
-      throw new NotFoundException('Error al encontrar el trámite')
 
     if( !availableDesk )
       throw new NotFoundException('No hay mesas disponibles para esa fecha y hora')

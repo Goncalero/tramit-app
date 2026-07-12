@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MinLength } from "class-validator"
+import { IsNotEmpty, IsString, IsUUID, MinLength } from "class-validator"
 
 
 export class CreateTramitDto {
@@ -9,5 +9,10 @@ export class CreateTramitDto {
 
     @IsString()
     description!: string
+
+    @IsUUID()
+    @IsString()
+    @IsNotEmpty()
+    room!: string
 
 }

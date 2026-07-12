@@ -1,7 +1,11 @@
 import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsStrongPassword } from "class-validator";
 
 
-export class CreateLoginUserDto {
+export class CreateUserDto {
+
+    @IsString()
+    @IsNotEmpty()
+    name!: string
 
     @IsString()
     @IsEmail()
@@ -13,4 +17,8 @@ export class CreateLoginUserDto {
     @IsNotEmpty()
     password!: string
 
+    @IsString({ each: true }) // RECORRE LOS ELEMENTOS DEL ARRAY Y SE CERCIORA DE QUE TODOS SON string
+    @IsArray()
+    @IsOptional()
+    role?: string[]
 }

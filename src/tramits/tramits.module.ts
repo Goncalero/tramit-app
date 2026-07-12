@@ -8,7 +8,8 @@ import { Tramit } from './entities/tramit.entity';
  
   controllers: [TramitsController],
   providers: [TramitsService],
+  exports: [TypeOrmModule],
   imports:[ TypeOrmModule.forFeature([ Tramit ])],
-  exports: [TypeOrmModule]
+  
 })
 export class TramitsModule {}

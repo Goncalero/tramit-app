@@ -45,24 +45,16 @@ export class User{
 
     // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeInsert()
-    checkNameLowerCase(){
+    checkNameEmailLowerCase(){
         this.name = this.name.toLowerCase()
-    }
-
-    @BeforeInsert()
-    checkEmailLowerCase(){
         this.email = this.email.toLowerCase()
+        
     }
 
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
-        this.checkNameLowerCase()
-    }
-
-    @BeforeUpdate()
-    checkEmailLowerCaseUpdate(){
-        this.checkEmailLowerCase()
+        this.checkNameEmailLowerCase()
     }
     
 }

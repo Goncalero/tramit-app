@@ -1,5 +1,6 @@
 import { Appointment } from "src/appointments/entities/appointment.entity";
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Room } from "src/rooms/entities/room.entity";
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity('tramits')
@@ -24,6 +25,13 @@ export class Tramit {
         (appointment) => appointment.tramit
     )
     appointment!: Appointment
+
+    @ManyToOne(
+        () => Room,
+        (room) => room.tramit,
+        { eager: true }
+    )
+    room!: Room
 
     // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeInsert()

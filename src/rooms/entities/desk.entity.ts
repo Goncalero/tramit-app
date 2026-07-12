@@ -1,7 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Room } from "./room.entity";
-import { User } from "src/auth/entities/user.entity";
+
 import { Appointment } from "src/appointments/entities/appointment.entity";
+import { User } from "src/users/entities/user.entity";
 
 @Entity('desk')
 export class Desk{

@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsUUID, Min } from "class-validator";
+import { IsNotEmpty, IsString, IsUUID, Min } from "class-validator";
 
 
 export class CreateDeskDto{
@@ -7,9 +7,8 @@ export class CreateDeskDto{
     @IsNotEmpty()
     roomId!: string
 
-    @IsInt()
-    @Min(1) // PARA NÚMEROS SE UTILIZA EL Min EN VEZ DEL MinLength
-    deskNumber!: number
+    @IsString()
+    deskNumber!: string
 
 
 }

@@ -1,6 +1,7 @@
-import { Desk } from "src/rooms/entities/desk.entity";
-import { Tramit } from "src/tramits/entities/tramit.entity";
+
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Desk } from '../../rooms/entities/desk.entity';
+import { Tramit } from '../../tramits/entities/tramit.entity';
 
 
 @Entity('appointments')
@@ -43,7 +44,7 @@ export class Appointment {
     // RELACIONES CON OTRAS TABLAS
     @ManyToOne(
         () => Desk,
-        (desk) => desk.appointment
+        (desk) => desk.appointment,
     )
     desk!: Desk
 

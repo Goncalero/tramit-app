@@ -1,6 +1,8 @@
+
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Desk } from "./desk.entity";
-import { Tramit } from "src/tramits/entities/tramit.entity";
+import { Tramit } from '../../tramits/entities/tramit.entity';
+
 
 
 @Entity('rooms')
@@ -30,7 +32,7 @@ export class Room {
         () => Tramit,
         (tramit) => tramit.room,
     )
-    tramit!: Tramit
+    tramit!: Tramit[]
     
     // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeInsert()

@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 
 import { Tramit } from './entities/tramit.entity';
 import { Room } from 'src/rooms/entities/room.entity';
+import { PaginationDto } from 'src/common/pagination.dto';
 
 
 
@@ -46,20 +47,38 @@ export class TramitsService {
 
       this.handleDBExceptions(error)
     }
-    }
-
-  findAll() {
-    return `This action returns all tramits`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tramit`;
+
+  async findAllTramits( paginationDto : PaginationDto ) {
+
+    const { limit = 5, offset } = paginationDto
+
+    const allTramits = await this.tramitRepository.createQueryBuilder('tramit')
+      .leftJoinAndSelect('tramit.room', 'room')
+      .leftJoin('room.desk', 'desk')
+      .addSelect( ['desk.id', 'desk.deskNumber'] )
+      .take(limit)
+      .skip(offset)
+      .getMany()
+    
+    return allTramits;
   }
+
+
+  async findOneTramit(id: string) {
+
+    const oneTramit = await this.tramitRepository.findOneBy({ id: id }) 
+
+    return oneTramit
+  }
+
 
   update(id: number, updateTramitDto: UpdateTramitDto) {
     return `This action updates a #${id} tramit`;
   }
 
+  
   remove(id: number) {
     return `This action removes a #${id} tramit`;
   }

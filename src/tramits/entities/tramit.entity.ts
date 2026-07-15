@@ -1,6 +1,7 @@
-import { Appointment } from "src/appointments/entities/appointment.entity";
-import { Room } from "src/rooms/entities/room.entity";
+
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Appointment } from '../../appointments/entities/appointment.entity';
+import { Room } from 'src/rooms/entities/room.entity';
 
 
 @Entity('tramits')
@@ -24,12 +25,11 @@ export class Tramit {
         () => Appointment,
         (appointment) => appointment.tramit
     )
-    appointment!: Appointment
+    appointment!: Appointment[]
 
     @ManyToOne(
         () => Room,
         (room) => room.tramit,
-        { eager: true }
     )
     room!: Room
 

@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 
 import { User } from './entities/user.entity';
+import { PaginationDto } from 'src/common/pagination.dto';
 
 
 
@@ -16,12 +17,23 @@ export class UsersService {
   ){}
 
 
-  findAll() {
-    return `This action returns all users`;
+  async findAllUsers( paginationDto : PaginationDto ) {
+
+    const { limit = 10, offset } = paginationDto
+    const allUsers = await this.userRepository.find({
+
+      take: limit,
+      skip: offset,
+    })
+
+    return allUsers;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOneUser(id: string) {
+
+    const oneUser = await this.userRepository.findOneBy({id: id})
+    
+    return oneUser;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

@@ -34,11 +34,7 @@ export class AppointmentsService {
     const { tramitId, appointmentDate} = createAppointmentDto //HACEMOS UN DESTRUCTURING DEL tramitId
     const parseDate = new Date(appointmentDate) //CONVERTIR A FECHA LEGIBLE
 
-    const tramit = await this.tramitRepository.findOne({ 
-      where: { id: tramitId },
-      relations: { room: true } 
-
-      })
+    const tramit = await this.tramitRepository.findOneBy({ id: tramitId })
 
     if ( !tramit )
     throw new NotFoundException('Error al encontrar el trámite')
@@ -92,17 +88,14 @@ export class AppointmentsService {
 
     const { limit = 10, offset } = paginationDto
 
-    const allAppoint = await this.appointmentRepository.find(
+    const allAppoint = await this.appointmentRepository.createQueryBuilder('appointment')
 
-      {
-        take: limit,
-        skip: offset,
-        relations: {
-          desk: true //EL NÚMERO DE MESA TAMBÍEN VIENE EN LA CONSULTA
-        }
-    
-      }
-    )
+      .leftJoinAndSelect('appointment.tramit', 'tramit')
+      .leftJoinAndSelect('tramit.room', 'room')
+      .leftJoinAndSelect('appointment.desk', 'desk')
+      .take(limit)
+      .skip(offset)
+      .getMany()
 
     return allAppoint
   }

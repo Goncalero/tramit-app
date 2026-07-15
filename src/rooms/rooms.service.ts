@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 
 import { Desk } from './entities/desk.entity';
 import { Room } from './entities/room.entity';
+import { PaginationDto } from 'src/common/pagination.dto';
 
 
 
@@ -38,6 +39,7 @@ export class RoomsService {
     }
   }
 
+
   async createDesk(createDeskDto: CreateDeskDto) {
 
     const { roomId } = createDeskDto
@@ -65,18 +67,53 @@ export class RoomsService {
   }
 
 
-  findAll() {
-    return `This action returns all rooms`;
+  async findAllRooms( paginationDto : PaginationDto) {
+
+    const { limit = 5, offset } = paginationDto
+
+    const allRooms = await this.roomRepository.find({
+
+      take: limit,
+      skip: offset,
+    })
+    return allRooms;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} room`;
+
+  async findAllDesks( paginationDto : PaginationDto) {
+
+    const { limit = 10, offset } = paginationDto
+
+    const allRooms = await this.deskRepository.find({
+
+      take: limit,
+      skip: offset,
+    })
+    return allRooms;
   }
+
+
+  async findOneRoom(id: string) {
+
+    const oneRoom = await this.roomRepository.findOneBy({ id: id })
+
+    return oneRoom;
+  }
+
+
+  async findOneDesk(id: string) {
+
+    const oneDesk = await this.deskRepository.findOneBy({ id: id })
+
+    return oneDesk;
+  }
+
 
   update(id: number, updateRoomDto: UpdateRoomDto) {
     return `This action updates a #${id} room`;
   }
 
+  
   remove(id: number) {
     return `This action removes a #${id} room`;
   }

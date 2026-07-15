@@ -11,10 +11,9 @@ export class Desk{
     id!: string
 
     @Column({
-        type: 'int',
-        default: 0,
+        type: 'text'
     })
-    deskNumber!: number
+    deskNumber!: string
 
 
     // RELACIONES CON OTRAS TABLAS

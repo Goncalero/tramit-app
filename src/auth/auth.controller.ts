@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
+
 import { CreateLoginUserDto } from './dto/create-user.dto';
-import { UpdateLoginUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from './auth.service';
 
 
 
@@ -14,23 +17,18 @@ export class AuthController {
     return this.authService.login(createAuthDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('register')
+  registerUser(@Body() createUserDto: CreateUserDto) {
+    return this.authService.createUser(createUserDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Get('private')
+  @UseGuards(AuthGuard())
+  testingPrivateRoute(){
+    return {
+      ok: true,
+      message: 'esta es una ruta privada'
+    }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateLoginUserDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
-  }
 }

@@ -85,5 +85,24 @@ export class Appointment {
     checkDniLowerCaseUpdate(){
         this.checkDniLowerCase()
     }
+    // FUNCIÓN PARA QUE NOS MUESTRE LOS CAMPOS QUE QUERAMOS EN POSTMAN
+    get formatoDeCitas(){
+        const { desk, tramit, ...rest } = this
+
+        return {
+            ...rest,
+            tramit:{
+                ...tramit,
+            room: {
+                ...tramit.room,
+            desk: {
+                id: desk.id,
+                deskNumber: desk.deskNumber
+            }
+            }
+            }
+        }
+
+    }
 
 }

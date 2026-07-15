@@ -42,7 +42,7 @@ export class Tramit {
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
-        this.checkNameLowerCase
+        this.checkNameLowerCase()
     }
 
 }

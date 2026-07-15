@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -40,9 +40,19 @@ export class RoomsService {
 
   async createDesk(createDeskDto: CreateDeskDto) {
 
+    const { roomId } = createDeskDto
+    const room = await this.roomRepository.findOneBy({id: roomId})
+
+    if( !room )
+      throw new NotFoundException('La sala con el id "${roomId}" no existe')
+  
     try {
 
-      const deskBD = this.deskRepository.create(createDeskDto)
+      const deskBD = this.deskRepository.create({
+        ...createDeskDto,
+        room
+    })
+
       await this.deskRepository.save(deskBD)
 
       return deskBD

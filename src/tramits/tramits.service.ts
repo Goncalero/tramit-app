@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 
 import { CreateTramitDto } from './dto/create-tramit.dto';
 import { UpdateTramitDto } from './dto/update-tramit.dto';
@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Tramit } from './entities/tramit.entity';
+import { Room } from 'src/rooms/entities/room.entity';
 
 
 
@@ -16,18 +17,26 @@ export class TramitsService {
 
   constructor(
     @InjectRepository( Tramit )
-    private readonly tramitRepository : Repository<Tramit>
+    private readonly tramitRepository : Repository<Tramit>,
+
+    @InjectRepository( Room )
+    private readonly roomRepository : Repository<Room>
   ){}
 
   async createTramit(createTramitDto: CreateTramitDto) {
 
     const { room, ...tramitData} = createTramitDto
+    
+    //ESTO SE HACE ASÍ PORQUE ES UNA RELACION ManyToOne()
+    const roomBD = await this.roomRepository.findOneBy({ id: room })
+    if( !roomBD )
+      throw new NotFoundException('La sala no exite')
 
     try {
 
       const tramitBD = this.tramitRepository.create({
         ...tramitData,
-        room: { id: room }
+        room: roomBD
       })
       await this.tramitRepository.save(tramitBD)
     

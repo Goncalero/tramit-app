@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { Desk } from 'src/rooms/entities/desk.entity';
 import { Tramit } from 'src/tramits/entities/tramit.entity';
 import { Appointment } from './entities/appointment.entity';
+import { PaginationDto } from 'src/common/pagination.dto';
 
 
 
@@ -31,8 +32,13 @@ export class AppointmentsService {
   async createAppoint(createAppointmentDto: CreateAppointmentDto) {
 
     const { tramitId, appointmentDate} = createAppointmentDto //HACEMOS UN DESTRUCTURING DEL tramitId
+    const parseDate = new Date(appointmentDate) //CONVERTIR A FECHA LEGIBLE
 
-    const tramit = await this.tramitRepository.findOneBy({ id: tramitId })
+    const tramit = await this.tramitRepository.findOne({ 
+      where: { id: tramitId },
+      relations: { room: true } 
+
+      })
 
     if ( !tramit )
     throw new NotFoundException('Error al encontrar el trámite')
@@ -44,7 +50,7 @@ export class AppointmentsService {
 
     })
     const occupiedAppoint = await this.appointmentRepository.find({ //BUSCA LA desk Y date PARA SABER SI ESTÁ OCUPADA LA MESA A ESA HORA
-      where: { appointmentDate }, // ESTO ES LO MISMO QUE PONER EN LA RELACIÓN DE LA ENTIDAD {eager:true}
+      where: { appointmentDate: parseDate }, // ESTO ES LO MISMO QUE PONER EN LA RELACIÓN DE LA ENTIDAD {eager:true}
       relations: { desk: true } 
     });
 
@@ -65,14 +71,15 @@ export class AppointmentsService {
 
       const appointment = this.appointmentRepository.create({
         ...createAppointmentDto,
-        appointmentDate,
+        appointmentDate: parseDate,
         tramit,
         desk: availableDesk
       })
 
       await this.appointmentRepository.save( appointment )
 
-      return appointment
+      //ESTÁ EN NUESTRO ENTITY, SIRVE PARA QUE APAREZCA TODA LA INFO EN tramits
+      return appointment.formatoDeCitas 
 
     } catch (error) {
 
@@ -81,12 +88,36 @@ export class AppointmentsService {
     }
   }
 
-  findAll() {
-    return `This action returns all appointments`;
+  async findAll(paginationDto : PaginationDto) {
+
+    const { limit = 10, offset } = paginationDto
+
+    const allAppoint = await this.appointmentRepository.find(
+
+      {
+        take: limit,
+        skip: offset,
+        relations: {
+          desk: true //EL NÚMERO DE MESA TAMBÍEN VIENE EN LA CONSULTA
+        }
+    
+      }
+    )
+
+    return allAppoint
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} appointment`;
+  async findOne(id: string) {
+
+    const oneAppoint = await this.appointmentRepository.findOne({
+      where: { id },
+      relations: { desk: true, tramit: { room: true } }
+    })
+
+    if( !oneAppoint )
+      throw new NotFoundException('Error al encontrar una cita en concreto')
+
+    return oneAppoint.formatoDeCitas
   }
 
   update(id: number, updateAppointmentDto: UpdateAppointmentDto) {

@@ -2,6 +2,7 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Desk } from '../../rooms/entities/desk.entity';
 import { Tramit } from '../../tramits/entities/tramit.entity';
+import { mayusName } from "src/common/mayus-name";
 
 
 @Entity('appointments')
@@ -13,10 +14,16 @@ export class Appointment {
     @Column({ type:'text' })
     citizenName!: string
 
-    @Column({ type:'text' })
+    @Column({ 
+        type:'text',
+        unique: true
+    })
     citizenEmail!: string
 
-    @Column({ type:'text' })
+    @Column({ 
+        type:'text',
+        unique: true
+     })
     citizenDni!: string
 
     @Column({ type:'text' })
@@ -27,7 +34,7 @@ export class Appointment {
     
     @Column({ 
         type:'text',
-        default: 'PENDIENTE'
+        default: 'ASIGNADA'
     })
     status!: string
 
@@ -55,10 +62,14 @@ export class Appointment {
     )
     tramit!: Tramit
 
-    // ANTES DE "INSERTAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeInsert()
-    checkNameLowerCase(){
-        this.citizenName = this.citizenName.toLowerCase()
+    checkNameMayusCase(){
+        this.citizenName = mayusName(this.citizenName)
+    }
+
+     @BeforeInsert()
+    checkNameMayusCaseUpdate(){
+        this.checkNameMayusCase()
     }
 
     @BeforeInsert()
@@ -67,15 +78,10 @@ export class Appointment {
     }
 
     @BeforeInsert()
-    checkDniLowerCase(){
-        this.citizenDni = this.citizenDni.toLowerCase()
+    checkDniUpperCase(){
+        this.citizenDni = this.citizenDni.toUpperCase()
     }
 
-    // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
-    @BeforeUpdate()
-    checkNameLowerCaseUpdate(){
-        this.checkNameLowerCase()
-    }
 
     @BeforeUpdate()
     checkEmailLowerCaseUpdate(){
@@ -83,27 +89,8 @@ export class Appointment {
     }
 
     @BeforeUpdate()
-    checkDniLowerCaseUpdate(){
-        this.checkDniLowerCase()
+    checkDniUpperCaseUpdate(){
+        this.checkDniUpperCase()
     }
-    // FUNCIÓN PARA QUE NOS MUESTRE LOS CAMPOS QUE QUERAMOS EN POSTMAN
-    get formatoDeCitas(){
-        const { desk, tramit, ...rest } = this
-
-        return {
-            ...rest,
-            tramit:{
-                ...tramit,
-            room: {
-                ...tramit.room,
-            desk: {
-                id: desk.id,
-                deskNumber: desk.deskNumber
-            }
-            }
-            }
-        }
-
-    }
-
+   
 }

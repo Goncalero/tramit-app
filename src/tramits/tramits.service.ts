@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { Tramit } from './entities/tramit.entity';
 import { Room } from 'src/rooms/entities/room.entity';
 import { PaginationDto } from 'src/common/pagination.dto';
+import { isUUID } from 'class-validator';
+import { DataSource } from 'typeorm';
 
 
 
@@ -21,7 +23,10 @@ export class TramitsService {
     private readonly tramitRepository : Repository<Tramit>,
 
     @InjectRepository( Room )
-    private readonly roomRepository : Repository<Room>
+    private readonly roomRepository : Repository<Room>,
+
+    private readonly dataSource : DataSource
+
   ){}
 
   async createTramit(createTramitDto: CreateTramitDto) {
@@ -66,27 +71,106 @@ export class TramitsService {
   }
 
 
-  async findOneTramit(id: string) {
+  async findOneTramit(term: string) {
 
-    const oneTramit = await this.tramitRepository.findOneBy({ id: id }) 
+    let oneTramit : Tramit | null
+
+    if( isUUID(term) ){
+        oneTramit = await this.tramitRepository.createQueryBuilder('tramit')
+                  .where('tramit.id = :id',{ id:term })
+                  .leftJoinAndSelect('tramit.room', 'room')
+                  .leftJoinAndSelect('room.desk', 'desk')
+                  .getOne()
+ 
+    }else{ 
+       oneTramit = await this.tramitRepository.createQueryBuilder('tramit')
+                  .where('unaccent(LOWER(tramit.name)) = unaccent(LOWER(:name))',{ name:term.toLowerCase() })
+                  .leftJoinAndSelect('tramit.room', 'room')
+                  .leftJoinAndSelect('room.desk', 'desk')
+                  .getOne()
+  }
+    if( !oneTramit )
+      throw new NotFoundException('Trámite no encontrado')
 
     return oneTramit
   }
-
-
-  update(id: number, updateTramitDto: UpdateTramitDto) {
-    return `This action updates a #${id} tramit`;
-  }
-
   
-  remove(id: number) {
-    return `This action removes a #${id} tramit`;
-  }
+  async updateOneTramit(term: string, updateTramitDto: UpdateTramitDto) {
 
-    // HEMOS CREADO UN LOGGER PARA LA FUNCIÓN handleDBExceptions (MANEJO DE ERRORES)
+    const { room, ...restProperties } = updateTramitDto
+
+    const oneTramit = await this.findOneTramit(term)
+
+    const modTramit = await this.tramitRepository.preload({ 
+      id: oneTramit.id, 
+      ...restProperties,
+      room: room ? { id: room } : undefined
+     })
+
+    if( !modTramit )
+      throw new BadRequestException('No se puede pre-cargar la información del trámite')
+
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+
+
+    try {
+
+    await queryRunner.manager.save(modTramit)
+    await queryRunner.commitTransaction()
+    return modTramit
+
+    } catch (error) {
+
+      await queryRunner.rollbackTransaction()
+      console.log(error);
+      throw new BadRequestException('Error al modificar los datos del trámite')
+      
+    } finally{
+
+      await queryRunner.release()
+    }
+  }
+  /* SI EL updateOneTramit QUEREMOS HACERLO CON queryRunner SERÍA ASÍ
+
+  async updateOneTramit(term: string, updateTramitDto: UpdateTramitDto) {
+
+    const { room, ...restProperties } = updateTramitDto
+
+    const oneTramit = await this.findOneTramit(term)
+
+    const preloadTramit = await this.tramitRepository.preload({ room: { id: room } , id: oneTramit.id, ...restProperties })
+
+    if( !preloadTramit )
+      throw new BadRequestException('No se puede pre-cargar la información del trámite')
+
+    const saveTramit = await this.tramitRepository.save(preloadTramit)
+
+
+    return saveTramit;
+  }  */
+
+  removeTramit(term: string) {
+
+    throw new BadRequestException('No se puede eliminar ningún trámite por motivos de seguridad')
+  }   
+  /*  SI QUISIERAMOS BORRA EL TRÁMITE PARA SIEMPRE, LO HACEMOS ASÍ,
+  Y ACTIVAMOS Cascade: true EN LA RELACIÓN DE LA CITA
+
+  async removeTramit(term: string) {
+
+    const remTramit = await this.findOneTramit(term)
+    await this.tramitRepository.remove(remTramit)
+
+    return {message: `El trámite ${term} ha sido eliminado`};
+  }   */
+
+
+  // HEMOS CREADO UN LOGGER PARA LA FUNCIÓN handleDBExceptions (MANEJO DE ERRORES)
     private readonly logger = new Logger('AppointmentService');
 
-    //CREAMOS UNA FUNCIÓN PARA EL MANEJO DE ERRORES, Y ASI PODER USARLO DONDE QUERAMOS
+  //CREAMOS UNA FUNCIÓN PARA EL MANEJO DE ERRORES, Y ASI PODER USARLO DONDE QUERAMOS
     private handleDBExceptions( error: any ) {
        console.log(error);
         if ( error.code === '23505' )

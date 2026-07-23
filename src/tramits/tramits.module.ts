@@ -4,6 +4,7 @@ import { TramitsController } from './tramits.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Tramit } from './entities/tramit.entity';
 import { RoomsModule } from 'src/rooms/rooms.module';
+import { DataSource } from 'typeorm';
 
 @Module({
  
@@ -13,7 +14,7 @@ import { RoomsModule } from 'src/rooms/rooms.module';
   imports:[ 
     TypeOrmModule.forFeature([ Tramit ]),
     RoomsModule,
-
+    TypeOrmModule,
 ],
   
 })

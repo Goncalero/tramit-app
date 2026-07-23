@@ -11,6 +11,8 @@ import { Desk } from 'src/rooms/entities/desk.entity';
 import { Tramit } from 'src/tramits/entities/tramit.entity';
 import { Appointment } from './entities/appointment.entity';
 import { PaginationDto } from 'src/common/pagination.dto';
+import { isUUID } from 'class-validator';
+import { DataSource } from 'typeorm';
 
 
 
@@ -27,6 +29,9 @@ export class AppointmentsService {
     @InjectRepository(Tramit)
       private readonly tramitRepository : Repository<Tramit>,
 
+      //PARA PODER CREAR UNA queryRunner
+      private readonly dataSource : DataSource
+
   ){}
 
   async createAppoint(createAppointmentDto: CreateAppointmentDto) {
@@ -34,7 +39,10 @@ export class AppointmentsService {
     const { tramitId, appointmentDate} = createAppointmentDto //HACEMOS UN DESTRUCTURING DEL tramitId
     const parseDate = new Date(appointmentDate) //CONVERTIR A FECHA LEGIBLE
 
-    const tramit = await this.tramitRepository.findOneBy({ id: tramitId })
+    const tramit = await this.tramitRepository.findOne({
+       where: { id: tramitId },
+       relations: { room: true } 
+      })
 
     if ( !tramit )
     throw new NotFoundException('Error al encontrar el trámite')
@@ -74,8 +82,7 @@ export class AppointmentsService {
 
       await this.appointmentRepository.save( appointment )
 
-      //ESTÁ EN NUESTRO ENTITY, SIRVE PARA QUE APAREZCA TODA LA INFO EN tramits
-      return appointment.formatoDeCitas 
+      return appointment
 
     } catch (error) {
 
@@ -100,25 +107,73 @@ export class AppointmentsService {
     return allAppoint
   }
 
-  async findOne(id: string) {
+  async findOneAppoint(term: string) {
 
-    const oneAppoint = await this.appointmentRepository.findOne({
-      where: { id },
-      relations: { desk: true, tramit: { room: true } }
-    })
+    let oneAppoint : Appointment | null
 
-    if( !oneAppoint )
-      throw new NotFoundException('Error al encontrar una cita en concreto')
-
-    return oneAppoint.formatoDeCitas
+    //SI PONEMOS EL UUID DE LA CITA ENTRA POR AQUI Y BUSCA POR id
+    if(isUUID(term)){
+       oneAppoint = await this.appointmentRepository.createQueryBuilder('appoint')
+                  .where('appoint.id = :id', {id : term})
+                  .leftJoinAndSelect('appoint.tramit', 'tramit')
+                  .leftJoinAndSelect('tramit.room', 'room') //leftJoinAndSelect ES PARA UNIR LA TABLA Y MOSTRAR ESA PROPIEDAD
+                  .leftJoinAndSelect('appoint.desk', 'desk') //leftJoin A SECAS UNE LA TABLA PERO NO MUESTRA LA PROPIEDAD
+                  .getOne()
+                  
+    //SI PONEMOS EL NOMBRE DEL CIUDADANO ENTRA POR AQUI Y BUSCA POR citizenName
+    }else{
+      oneAppoint = await this.appointmentRepository.createQueryBuilder('appoint')
+                  .where('unaccent(LOWER(appoint.citizenName)) = unaccent(LOWER(:citizenName))', {citizenName : term.toLowerCase()})
+                  .leftJoinAndSelect('appoint.tramit', 'tramit')
+                  .leftJoinAndSelect('tramit.room', 'room')
+                  .leftJoinAndSelect('appoint.desk', 'desk')
+                  .getOne()
+    }
+      if( !oneAppoint )
+        throw new NotFoundException('Error al encontrar una cita en concreto')
+      return oneAppoint
   }
 
-  update(id: number, updateAppointmentDto: UpdateAppointmentDto) {
-    return `This action updates a #${id} appointment`;
+  async updateOneAppoint(term: string, updateAppointmentDto: UpdateAppointmentDto) {
+
+    const oneAppoint = await this.findOneAppoint(term)
+    const modAppoint = await this.appointmentRepository.preload({
+      id: oneAppoint.id,  
+      ...updateAppointmentDto 
+      })
+    if( !modAppoint )
+      throw new BadRequestException('Error al pre-cargar la Cita')
+
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+
+    try {
+      await queryRunner.manager.save(modAppoint)
+      await queryRunner.commitTransaction()
+      return modAppoint
+
+    } catch (error) {
+      await queryRunner.rollbackTransaction()
+      console.log(error);
+        throw new BadRequestException('No se han podido modificar los datos de la cita, mira el LOG')
+      
+    }finally{
+      await queryRunner.release()
+
+    }
+
+
+
+   
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} appointment`;
+  async removeAppoint(term: string) {
+
+    const remAppoint = await this.findOneAppoint( term )
+    await this.appointmentRepository.remove(remAppoint)
+    return { message: `La cita asociada a ${term} ha sido eliminada` }
+   
   }
 
   // HEMOS CREADO UN LOGGER PARA LA FUNCIÓN handleDBExceptions (MANEJO DE ERRORES)
@@ -133,5 +188,4 @@ export class AppointmentsService {
       this.logger.error(error)
       throw new InternalServerErrorException('Error inesperado, chequea los logs del servidor')
   }
-
 }

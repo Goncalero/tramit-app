@@ -1,5 +1,6 @@
 import { Desk } from "src/rooms/entities/desk.entity";
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { mayusName } from '../../common/mayus-name';
 
 
 @Entity('users')
@@ -28,7 +29,7 @@ export class User{
         array: true,
         default: ['user']
     })
-    role!: string[]
+    roles!: string[]
 
     @Column({ 
         type: 'bool',
@@ -41,20 +42,29 @@ export class User{
         () => Desk,
         ( desk ) => desk.user
     )
-    desk!: Desk
+    @JoinColumn() //NECESARIO UNIR 2 TABLAS EN RELACION OneToOne()
+    desk!: Desk | null
 
     // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
+     @BeforeInsert()
+    checkNameMayusCase(){
+        this.name = mayusName(this.name)
+    }
+
     @BeforeInsert()
-    checkNameEmailLowerCase(){
-        this.name = this.name.toLowerCase()
+    checkEmailLowerCase(){
         this.email = this.email.toLowerCase()
-        
     }
 
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
+    @BeforeInsert()
+    checkNameMayusCaseUpdate(){
+      this.checkNameMayusCase()
+    }
+
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
-        this.checkNameEmailLowerCase()
+        this.checkEmailLowerCase()
     }
     
 }

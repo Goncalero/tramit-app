@@ -1,8 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Room } from "./room.entity";
+import { User } from '../../users/entities/user.entity';
+import { Appointment } from '../../appointments/entities/appointment.entity';
+import { mayusName } from "src/common/mayus-name";
 
-import { Appointment } from "src/appointments/entities/appointment.entity";
-import { User } from "src/users/entities/user.entity";
+
 
 @Entity('desk')
 export class Desk{
@@ -24,7 +26,7 @@ export class Desk{
     )
     room!: Room
 
-    @JoinColumn() // ESTO SIRVE PARA HACER EL JOIN DE TABLAS
+   
     @OneToOne(
         () => User,
         ( user ) => user.desk
@@ -37,5 +39,14 @@ export class Desk{
     )
     appointment!: Appointment[]
 
+// ANTES DE "INSERTAR" EN LA BASE DE DATOS,CONVIERTE LA PRIMERA EN MAYÚSCULA
+    @BeforeInsert()
+    checkNameLowerCase(){
+        this.deskNumber = mayusName(this.deskNumber)
+    }
 
+    @BeforeUpdate()
+    checkDeskNameLowerCaseUpdate(){
+        this.checkNameLowerCase()
+    }
 }

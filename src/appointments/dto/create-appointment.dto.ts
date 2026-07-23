@@ -1,5 +1,5 @@
 import { Type } from "class-transformer"
-import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from "class-validator"
+import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length, Matches } from "class-validator"
 
 
 export class CreateAppointmentDto {
@@ -15,8 +15,9 @@ export class CreateAppointmentDto {
     citizenEmail!: string
 
     @IsString()
-    @Length(9,9)
     @IsNotEmpty()
+    //ESTO SIRVE PARA QUE TE COJA EL FORMATO dni
+    @Matches(/^\d{8}[A-Z]$/, { message: 'Introduce 8 números y una única letra mayúscula en el DNI' })
     citizenDni!: string
 
     @IsString()

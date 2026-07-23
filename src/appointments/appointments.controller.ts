@@ -20,18 +20,18 @@ export class AppointmentsController {
     return this.appointmentsService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.appointmentsService.findOne(id);
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.appointmentsService.findOneAppoint( term );
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
-    return this.appointmentsService.update(+id, updateAppointmentDto);
+  @Patch(':term')
+  update(@Param('term') term: string, @Body() updateAppointmentDto: UpdateAppointmentDto) {
+    return this.appointmentsService.updateOneAppoint(term, updateAppointmentDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.appointmentsService.remove(+id);
+  @Delete(':term')
+  remove(@Param('term') term: string) {
+    return this.appointmentsService.removeAppoint(term);
   }
 }

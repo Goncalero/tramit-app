@@ -2,6 +2,7 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Appointment } from '../../appointments/entities/appointment.entity';
 import { Room } from 'src/rooms/entities/room.entity';
+import { mayusName } from "src/common/mayus-name";
 
 
 @Entity('tramits')
@@ -36,7 +37,7 @@ export class Tramit {
     // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
     @BeforeInsert()
     checkNameLowerCase(){
-        this.name = this.name.toLowerCase()
+        this.name = mayusName(this.name)
     }
 
     // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
@@ -44,5 +45,4 @@ export class Tramit {
     checkNameLowerCaseUpdate(){
         this.checkNameLowerCase()
     }
-
 }

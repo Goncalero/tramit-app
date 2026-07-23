@@ -18,18 +18,18 @@ export class TramitsController {
     return this.tramitsService.findAllTramits(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.tramitsService.findOneTramit(id);
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.tramitsService.findOneTramit( term );
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTramitDto: UpdateTramitDto) {
-    return this.tramitsService.update(+id, updateTramitDto);
+  @Patch(':term')
+  update(@Param('term') term: string, @Body() updateTramitDto: UpdateTramitDto) {
+    return this.tramitsService.updateOneTramit(term, updateTramitDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tramitsService.remove(+id);
+  @Delete(':term')
+  remove(@Param('term') term: string) {
+    return this.tramitsService.removeTramit(term);
   }
 }

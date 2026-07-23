@@ -2,6 +2,7 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Desk } from "./desk.entity";
 import { Tramit } from '../../tramits/entities/tramit.entity';
+import { mayusName } from '../../common/mayus-name';
 
 
 
@@ -34,13 +35,13 @@ export class Room {
     )
     tramit!: Tramit[]
     
-    // ANTES DE INSERTAR EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
+    // ANTES DE INSERTAR EN LA BASE DE DATOS, CONVIERTE EN MAYÚSCULA LA PRIMERA LETRA
     @BeforeInsert()
     checkNameLowerCase(){
-        this.name = this.name.toLowerCase()
+        this.name = mayusName(this.name)
     }
 
-    // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, LO CONVIERTE EN MINÚSCULAS
+    // ANTES DE "MODIFICAR" EN LA BASE DE DATOS, CONVIERTE EN MAYÚSCULA LA PRIMERA LETRA
     @BeforeUpdate()
     checkNameLowerCaseUpdate(){
         this.checkNameLowerCase()

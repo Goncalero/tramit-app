@@ -1,18 +1,18 @@
 
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, UnauthorizedException } from '@nestjs/common';
 
-import { CreateLoginUserDto } from './dto/create-user.dto';
+import { CreateLoginUserDto } from './dto/login-user.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { Desk } from '../rooms/entities/desk.entity';
 
 import { JwtPayload } from './interfaces/jwt.payload.interfaces';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-
 
 @Injectable()
 export class AuthService {
@@ -20,6 +20,9 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository : Repository<User>,
+    @InjectRepository(Desk)
+    private readonly deskRepository : Repository<Desk>,
+
     private readonly jwtService : JwtService
   ){}
 
@@ -34,9 +37,6 @@ export class AuthService {
                                                 .where('user.email = :email', {email})
                                                 .addSelect('user.password')
                                                 .getOne()
-      
-      
-
       if(!loginDB)
         throw new UnauthorizedException('Error al obtener las credenciales')
 
@@ -53,6 +53,8 @@ export class AuthService {
       } 
 
     } catch (error) {
+      //SI ME DA UN ERROR 500, LO MANEJO AQUI TAMBIÉN
+      if(error instanceof UnauthorizedException) throw error
       this.handleDBExceptions(error)
 
     }
@@ -62,14 +64,33 @@ export class AuthService {
   
       const { password, ...userData } = createUserDto
       const passwordHasheada = bcrypt.hashSync(password, 10)
+      const desks = await this.deskRepository.find({
+        relations: { user: true }
+      })
+
+      const avaiableDesk = await this.deskRepository.createQueryBuilder('desk')
+                          .where('user.id IS NULL')
+                          .leftJoin('users', 'user', 'user.deskId = desk.id') //UNIR TABLAS
+                          .getOne()
+
+      if( !avaiableDesk ){
+        throw new BadRequestException('No hay mesas libres de trabajo')
+      }
       
       try {
   
         const userDB = this.userRepository.create({
           ...userData,
-          password: passwordHasheada
+          password: passwordHasheada,
+          desk: avaiableDesk,
       })
         await this.userRepository.save(userDB)
+        
+        //PARA BORRAR QUE NO VUELVA A APARECER EL user EN POSTMAN AL CREAR
+        if( userDB.desk ){
+          delete (userDB.desk as any).user
+        }
+
           return {
             ...userDB,
             token: this.getJwtToken({ id: userDB.id })
@@ -82,9 +103,8 @@ export class AuthService {
       }
   }
 
-
   // HEMOS CREADO UN LOGGER PARA LA FUNCIÓN handleDBExceptions (MANEJO DE ERRORES)
-  private readonly logger = new Logger('AppointmentService');
+  private readonly logger = new Logger('AuthService');
 
   //CREAMOS UNA FUNCIÓN PARA EL MANEJO DE ERRORES, Y ASI PODER USARLO DONDE QUERAMOS
   private handleDBExceptions( error: any ) {

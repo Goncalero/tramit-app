@@ -9,10 +9,11 @@ import { TramitsModule } from 'src/tramits/tramits.module';
 @Module({
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
-  exports: [ TypeOrmModule ],
+  exports: [ TypeOrmModule, AppointmentsService ],
   imports: [ 
     RoomsModule,
     TramitsModule,
+    TypeOrmModule,
     TypeOrmModule.forFeature([ Appointment ]),
   ],
 })
